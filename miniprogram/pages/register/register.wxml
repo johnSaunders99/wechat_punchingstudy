@@ -1,0 +1,8 @@
+<view class="container">
+  <input placeholder="请输入昵称" bindinput="onNickInput" />
+  <picker mode="selector" range="{{['child','parent']}}" bindchange="onRoleChange">
+    <view>当前角色：{{role}}</view>
+  </picker>
+  <button open-type="chooseAvatar" bindchooseavatar="chooseAvatar">选择头像</button>
+  <button bindtap="submit">完成注册</button>
+</view>

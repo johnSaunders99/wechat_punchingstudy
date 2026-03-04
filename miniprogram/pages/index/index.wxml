@@ -1,0 +1,26 @@
+<view class="container">
+  <view class="header">
+    <text class="title">🌱 春日成长记</text>
+    <text class="sub-title">已加载 {{totalCount}} 条成长足迹</text>
+  </view>
+
+  <scroll-view scroll-y class="list-container" bindscrolltolower="loadMore">
+    <view class="card" wx:for="{{recordList}}" wx:key="_id" bindtap="goDetail" data-id="{{item._id}}">
+      <view class="card-header">
+        <image class="avatar" src="{{item.userAvatar}}" mode="aspectFill" />
+        <view class="info">
+          <text class="name">{{item.userName}}</text>
+          <text class="time">{{item.dateStr}} {{item.timeStr}}</text>
+        </view>
+        <view class="tag">{{typeMap[item.type]}}</view>
+      </view>
+      <view class="preview-hint">点击查看详情</view>
+    </view>
+
+    <view class="tips" wx:if="{{loading}}">加载中...</view>
+    <view class="tips" wx:if="{{noMore}}">没有更多记录了</view>
+  </scroll-view>
+
+  <view class="fab-btn" wx:if="{{canCheckin}}" bindtap="goCheckin">+ 我要打卡</view>
+  <view class="stats-entry" wx:if="{{isParent}}" bindtap="goStats">📊 查看统计报表</view>
+</view>
