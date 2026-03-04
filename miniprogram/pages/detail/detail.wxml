@@ -1,0 +1,6 @@
+<view class="container" wx:if="{{record}}">
+  <image class="image" src="{{tempUrl}}" mode="widthFix" />
+  <view class="meta">{{record.userName}} · {{record.dateStr}}</view>
+  <view class="meta">类型：{{record.type}}</view>
+  <view class="meta" wx:if="{{record.remark}}">备注：{{record.remark}}</view>
+</view>

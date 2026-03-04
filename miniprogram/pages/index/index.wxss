@@ -1,0 +1,17 @@
+.container { padding: 24rpx; }
+.header { margin-bottom: 20rpx; }
+.title { font-size: 36rpx; font-weight: 600; display: block; }
+.sub-title { color: #6b7280; font-size: 24rpx; }
+.list-container { height: 75vh; }
+.card { background: #fff; border-radius: 16rpx; padding: 20rpx; margin-bottom: 16rpx; }
+.card-header { display: flex; align-items: center; }
+.avatar { width: 72rpx; height: 72rpx; border-radius: 50%; margin-right: 16rpx; }
+.info { flex: 1; }
+.name { display:block; font-weight: 600; }
+.time { color:#6b7280; font-size: 24rpx; }
+.tag { background: #e8f4ff; color:#1677ff; border-radius: 20rpx; padding: 6rpx 14rpx; font-size: 24rpx; }
+.preview-hint { margin-top: 12rpx; color:#6b7280; font-size: 24rpx; }
+.tips { text-align:center; color:#6b7280; padding: 16rpx 0; }
+.fab-btn,.stats-entry { position: fixed; right: 24rpx; background:#1677ff; color:#fff; padding: 18rpx 24rpx; border-radius: 999rpx; }
+.fab-btn { bottom: 40rpx; }
+.stats-entry { bottom: 120rpx; background:#6b46c1; }
