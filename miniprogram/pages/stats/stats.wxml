@@ -1,0 +1,9 @@
+<view class="container">
+  <button bindtap="exportJson">复制统计 JSON</button>
+  <view wx:if="{{loading}}">加载中...</view>
+  <view class="card" wx:for="{{stats}}" wx:key="nickName">
+    <view>{{item.nickName}}（{{item.role}}）</view>
+    <view>总次数：{{item.totalCount}}，全勤天数：{{item.perfectDays}}</view>
+    <view>阅读{{item.reading}} 运动{{item.sport}} 手工{{item.craft}} 家务{{item.housework}}</view>
+  </view>
+</view>

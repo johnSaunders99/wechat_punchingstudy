@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/checkin/checkin",
+    "pages/detail/detail",
+    "pages/stats/stats",
+    "pages/register/register"
+  ],
+  "window": {
+    "navigationBarTitleText": "春日成长记",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
