@@ -2,7 +2,8 @@ App({
   globalData: {
     openid: '',
     userInfo: null,
-    isReady: false
+    isReady: false,
+    needRegister: false
   },
 
   onLaunch() {
@@ -30,13 +31,17 @@ App({
       const userRes = await db.collection('users').where({ _openid: openid }).limit(1).get();
 
       if (!userRes.data.length) {
+        this.globalData.needRegister = true;
         wx.hideLoading();
-        wx.redirectTo({ url: `/pages/register/register?openid=${openid}` });
+        wx.nextTick(() => {
+          wx.reLaunch({ url: `/pages/register/register?openid=${openid}` });
+        });
         return;
       }
 
       this.globalData.userInfo = userRes.data[0];
       this.globalData.isReady = true;
+      this.globalData.needRegister = false;
       wx.hideLoading();
     } catch (error) {
       wx.hideLoading();
