@@ -7,7 +7,7 @@
   </view>
 
   <button class="choose" bindtap="chooseImage">选择图片/拍照</button>
-  <image wx:if="{{tempFilePath}}" class="preview" src="{{tempFilePath}}" mode="aspectFill" />
+  <image wx:if="{{tempFilePath}}" class="preview" src="{{tempFilePath}}" mode="aspectFill"></image>
 
   <textarea class="remark" maxlength="100" placeholder="备注（最多100字）" value="{{remark}}" bindinput="onRemarkInput"></textarea>
   <button class="submit" loading="{{submitting}}" bindtap="submit">提交打卡</button>

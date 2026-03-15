@@ -2,7 +2,9 @@ Page({
   data: {
     nickName: '',
     avatarUrl: '',
-    role: 'child'
+    role: 'child',
+    roleOptions: ['child', 'parent'],
+    roleIndex: 0
   },
 
   onNickInput(e) {
@@ -10,7 +12,9 @@ Page({
   },
 
   onRoleChange(e) {
-    this.setData({ role: e.detail.value });
+    const roleIndex = Number(e.detail.value || 0);
+    const role = this.data.roleOptions[roleIndex] || 'child';
+    this.setData({ roleIndex, role });
   },
 
   chooseAvatar(e) {

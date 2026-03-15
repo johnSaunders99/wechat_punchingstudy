@@ -47,8 +47,9 @@ Page({
     wx.showLoading({ title: '上传中...' });
 
     try {
-      const app = getApp();
-      const user = app.globalData.userInfo;
+      const app = getApp({ allowDefault: true });
+      const user = app && app.globalData ? app.globalData.userInfo : null;
+      if (!user) throw new Error('用户信息未初始化');
       const timestamp = Date.now();
       const dateStr = toDateStr(timestamp);
       const ext = this.data.tempFilePath.split('.').pop();

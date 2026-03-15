@@ -1,9 +1,13 @@
+const config = require('./utils/config');
+
 App({
   globalData: {
     openid: '',
     userInfo: null,
     isReady: false
   },
+
+  userReadyCallbacks: [],
 
   onLaunch() {
     if (!wx.cloud) {
@@ -12,10 +16,27 @@ App({
     }
 
     wx.cloud.init({
+      env: config.envId,
       traceUser: true
     });
 
     this.checkLogin();
+  },
+
+  onUserReady(callback) {
+    if (typeof callback !== 'function') return;
+    if (this.globalData.userInfo) {
+      callback(this.globalData.userInfo);
+      return;
+    }
+    this.userReadyCallbacks.push(callback);
+  },
+
+  notifyUserReady(user) {
+    while (this.userReadyCallbacks.length) {
+      const cb = this.userReadyCallbacks.shift();
+      cb && cb(user);
+    }
   },
 
   async checkLogin() {
@@ -35,8 +56,10 @@ App({
         return;
       }
 
-      this.globalData.userInfo = userRes.data[0];
+      const user = userRes.data[0];
+      this.globalData.userInfo = user;
       this.globalData.isReady = true;
+      this.notifyUserReady(user);
       wx.hideLoading();
     } catch (error) {
       wx.hideLoading();

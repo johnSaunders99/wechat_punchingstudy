@@ -25,6 +25,53 @@ miniprogram/
       └── date.js       # 时间格式化工具
 ```
 
+
+## 部署前必须配置（关键项）
+
+> 你问的“图片存储和登录怎么配”，核心就在这几项。
+
+1. **云开发环境 ID（envId）**
+   - 文件：`miniprogram/utils/config.js`
+   - 把 `envId: 'your-env-id'` 改为你自己的环境 ID。
+   - `app.js` 中 `wx.cloud.init({ env: config.envId })` 会使用该值。
+
+2. **小程序 AppID + 云开发能力开通**
+   - 在微信开发者工具中配置你的小程序 AppID（不是测试号就必须真实 AppID）。
+   - 控制台开通“云开发”，并确保当前项目绑定到同一个云环境。
+
+3. **云数据库集合与索引**
+   - 创建集合：`users`、`checkins`。
+   - 推荐索引：
+     - `users`: `_openid`（自动）、`role`
+     - `checkins`: `timestamp`（降序）、`_openid`、`dateStr`
+
+4. **数据库权限规则（非常关键）**
+   - `users`：建议“仅创建者可读写”或按角色精细放开。
+   - `checkins`：建议普通用户仅可写自己的数据；家长看全量可通过云函数读取（避免前端直读全量暴露）。
+   - 生产环境优先把统计类查询放在云函数侧执行。
+
+5. **云存储（图片）配置**
+   - 上传使用 `wx.cloud.uploadFile`，路径格式：`checkins/{openid}/{timestamp}.ext`。
+   - 页面展示时用 `wx.cloud.getTempFileURL` 换临时链接。
+   - 若要“只保留半年”，部署 `cleanImages` 云函数并启用定时触发器（见 `cloudfunctions/cleanImages/config.json`）。
+
+6. **云函数部署与依赖**
+   - 需分别部署：`login`、`exportStats`、`cleanImages`。
+   - 每个云函数目录需要安装依赖（最少 `wx-server-sdk`）：
+     ```bash
+     cd cloudfunctions/login && npm i
+     cd ../exportStats && npm i
+     cd ../cleanImages && npm i
+     ```
+
+7. **登录配置说明（OpenID 获取）**
+   - 本方案通过云函数 `login` 的 `cloud.getWXContext()` 获取 `OPENID`，无需外部登录服务器。
+   - 首次登录后前端查询 `users`：不存在则进入注册页；存在则写入全局用户态。
+
+8. **用户信息能力（昵称/头像）**
+   - 注册页使用 `chooseAvatar`，需基础库与开发者工具版本支持。
+   - 昵称用输入框手动填写，避免依赖旧版 `getUserProfile` 授权流程。
+
 ## 数据库集合设计
 
 ### 1) users
@@ -76,3 +123,19 @@ miniprogram/
 - 删除对应数据库记录
 
 触发器配置见：`cloudfunctions/cleanImages/config.json`
+
+
+## 常见问题排查
+
+### 1) `TypeError: Cannot read property 'globalData' of undefined`
+该错误通常出现在页面比 `App` 初始化更早读取 `getApp().globalData`。
+
+本项目已做两层防护：
+- `getApp({ allowDefault: true })` 防止直接拿到 `undefined`。
+- `app.onUserReady(callback)` 等待登录完成后再使用 `userInfo`。
+
+如果你仍遇到该问题，请检查：
+- 是否在微信开发者工具里开启了云开发并绑定正确环境。
+- `miniprogram/utils/config.js` 中 `envId` 是否正确。
+- `login` 云函数是否已成功部署并可调用。
+

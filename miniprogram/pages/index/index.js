@@ -19,26 +19,48 @@ Page({
   },
 
   onShow() {
-    this.waitForUser().then(() => {
-      this.setData({ recordList: [], skip: 0, noMore: false, totalCount: 0 });
-      this.loadRecords();
-    });
+    this.waitForUser()
+      .then(() => {
+        this.setData({ recordList: [], skip: 0, noMore: false, totalCount: 0 });
+        this.loadRecords();
+      })
+      .catch((error) => {
+        wx.showToast({ title: error.message || '用户信息未就绪', icon: 'none' });
+      });
   },
 
   waitForUser() {
-    const app = getApp();
-    return new Promise((resolve) => {
-      const timer = setInterval(() => {
-        if (app.globalData.userInfo) {
-          clearInterval(timer);
-          const user = app.globalData.userInfo;
-          this.setData({
-            isParent: user.role === 'parent',
-            canCheckin: user.role === 'child'
-          });
-          resolve();
+    const app = getApp({ allowDefault: true });
+
+    return new Promise((resolve, reject) => {
+      if (!app || !app.globalData) {
+        reject(new Error('应用未初始化，请重启小程序'));
+        return;
+      }
+
+      if (app.globalData.userInfo) {
+        this.applyRole(app.globalData.userInfo);
+        resolve();
+        return;
+      }
+
+      app.onUserReady((user) => {
+        this.applyRole(user);
+        resolve();
+      });
+
+      setTimeout(() => {
+        if (!app.globalData.userInfo) {
+          reject(new Error('登录超时，请稍后重试'));
         }
-      }, 200);
+      }, 10000);
+    });
+  },
+
+  applyRole(user) {
+    this.setData({
+      isParent: user.role === 'parent',
+      canCheckin: user.role === 'child'
     });
   },
 
@@ -46,21 +68,26 @@ Page({
     if (this.data.loading || this.data.noMore) return;
     this.setData({ loading: true });
 
-    const db = wx.cloud.database();
-    const res = await db.collection('checkins')
-      .orderBy('timestamp', 'desc')
-      .skip(this.data.skip)
-      .limit(this.data.limit)
-      .get();
+    try {
+      const db = wx.cloud.database();
+      const res = await db.collection('checkins')
+        .orderBy('timestamp', 'desc')
+        .skip(this.data.skip)
+        .limit(this.data.limit)
+        .get();
 
-    const list = res.data.map((item) => ({ ...item, timeStr: toTimeStr(item.timestamp) }));
-    this.setData({
-      recordList: [...this.data.recordList, ...list],
-      skip: this.data.skip + list.length,
-      loading: false,
-      noMore: list.length < this.data.limit,
-      totalCount: this.data.totalCount + list.length
-    });
+      const list = res.data.map((item) => ({ ...item, timeStr: toTimeStr(item.timestamp) }));
+      this.setData({
+        recordList: [...this.data.recordList, ...list],
+        skip: this.data.skip + list.length,
+        loading: false,
+        noMore: list.length < this.data.limit,
+        totalCount: this.data.totalCount + list.length
+      });
+    } catch (error) {
+      this.setData({ loading: false });
+      wx.showToast({ title: '加载失败，请重试', icon: 'none' });
+    }
   },
 
   loadMore() {
