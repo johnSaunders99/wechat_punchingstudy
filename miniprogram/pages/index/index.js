@@ -19,7 +19,8 @@ Page({
   },
 
   onShow() {
-    this.waitForUser().then(() => {
+    this.waitForUser().then((ready) => {
+      if (!ready) return;
       this.setData({ recordList: [], skip: 0, noMore: false, totalCount: 0 });
       this.loadRecords();
     });
@@ -27,8 +28,16 @@ Page({
 
   waitForUser() {
     const app = getApp();
+    if (app.globalData.needRegister) return Promise.resolve(false);
+
     return new Promise((resolve) => {
       const timer = setInterval(() => {
+        if (app.globalData.needRegister) {
+          clearInterval(timer);
+          resolve(false);
+          return;
+        }
+
         if (app.globalData.userInfo) {
           clearInterval(timer);
           const user = app.globalData.userInfo;
@@ -36,7 +45,7 @@ Page({
             isParent: user.role === 'parent',
             canCheckin: user.role === 'child'
           });
-          resolve();
+          resolve(true);
         }
       }, 200);
     });
